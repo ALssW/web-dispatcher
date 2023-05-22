@@ -22,4 +22,5 @@ public class CorsFilter extends HttpFilter {
 		response.setContentType("application/json;charset=utf-8");
 		chain.doFilter(request, response);
 	}
+
 }

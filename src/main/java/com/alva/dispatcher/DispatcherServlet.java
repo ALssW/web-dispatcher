@@ -36,7 +36,6 @@ public class DispatcherServlet extends HttpServlet {
 
 	private final Pattern URI_PATTERN = Pattern.compile("(^/\\w*)");
 	private       String  contextPath;
-	private       String  contextPathTo;
 
 	/**
 	 * 初始化 Dispatcher Servlet
@@ -49,12 +48,11 @@ public class DispatcherServlet extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) {
 		contextPath = config.getServletContext().getContextPath();
-		contextPathTo = contextPath + "/";
 
 		// 通过 ServletConfig 获取 ServletContext 接着再获取 ServletRegistrations
 		// 在 ServletRegistrations 中则存有所有被 Tomcat 注册发现的 Servlet
 		Map<String, ? extends ServletRegistration> registrationMap = config.getServletContext().getServletRegistrations();
-		logger.debug("初始化 DispatcherServlet...");
+		logger.debug("初始化 DispatcherServlet...  contextPath [%s]", contextPath);
 		servletHandlerMap = new HashMap<>(registrationMap.size());
 
 		// 遍历 RegistrationMap 排除不必要的 Servlet
@@ -94,7 +92,7 @@ public class DispatcherServlet extends HttpServlet {
 				return;
 			}
 			for (String servletPath : registration.getMappings()) {
-				ServletHandler servletHandler = new ServletHandler(servletPath, dispatcherServlet.newInstance());
+				ServletHandler servletHandler = new ServletHandler(contextPath + servletPath, dispatcherServlet.newInstance());
 				servletHandlerMap.put(servletPath, servletHandler);
 				disassembleServlet(servletHandler);
 			}
@@ -129,9 +127,10 @@ public class DispatcherServlet extends HttpServlet {
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String requestUri = req.getRequestURI();
 		String nonePath   = "/";
-		if (contextPathTo.equals(requestUri) || nonePath.equals(requestUri)) {
+		if (contextPath.equals(requestUri) || nonePath.equals(requestUri)) {
 			return;
 		}
+		requestUri = requestUri.replaceAll("^" + contextPath, "");
 		Matcher uriMatcher = URI_PATTERN.matcher(requestUri);
 
 		String         servletUri;

@@ -12,7 +12,6 @@ import java.sql.SQLException;
  * @since 2023-02-09
  */
 public class ConnectionUtil {
-
 	private static final Logger<SqlUtil> logger = new Logger<>(SqlUtil.class);
 	private static final DataSource DATA_SOURCE;
 
